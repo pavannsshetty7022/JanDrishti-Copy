@@ -1,0 +1,64 @@
+.logo-css {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  user-select: none;
+  gap: 0.15em;
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+
+@media (max-width: 1366px) {
+  .sidebar .logo-css {
+    font-size: 1.6rem !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .sidebar .logo-css {
+    font-size: 1.4rem !important;
+  }
+}
+
+.logo-jan {
+  color: #1e40af;
+  
+}
+
+.logo-drishti {
+  color: #15803d;
+  
+  margin-right: 0.25em;
+}
+
+.logo-jd-badge {
+  background: #f97316;
+  
+  color: #ffffff;
+  padding: 0.1em 0.4em;
+  border-radius: 6px;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+
+[data-bs-theme='dark'] .logo-jan {
+  color: #60a5fa;
+  
+}
+
+[data-bs-theme='dark'] .logo-drishti {
+  color: #4ade80;
+  
+}
+
+[data-bs-theme='dark'] .logo-jd-badge {
+  box-shadow: 0 4px 10px -1px rgba(249, 115, 22, 0.6);
+}

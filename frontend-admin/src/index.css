@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #1E3A8A;
+  --secondary-color: #16A34A;
+  --accent-color: #F97316;
+  --error-color: #DC2626;
+  --background-color: #F8FAFC;
+  --card-color: #FFFFFF;
+  --primary-text: #1F2933;
+  --muted-text: #6B7280;
+}
+
+[data-bs-theme="dark"] {
+  --primary-color: #3B82F6;
+  --secondary-color: #10B981;
+  --accent-color: #FB923C;
+  --error-color: #EF4444;
+  --background-color: #0F172A;
+  --card-color: #1E293B;
+  --primary-text: #F1F5F9;
+  --muted-text: #94A3B8;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-color);
+  color: var(--primary-text);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+
+@media (max-width: 767.98px) {
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .px-lg-5 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .btn-lg {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+
+@media (max-width: 575.98px) {
+  .card-body {
+    padding: 1rem !important;
+  }
+  
+  .display-6 {
+    font-size: 1.5rem !important;
+  }
+}
