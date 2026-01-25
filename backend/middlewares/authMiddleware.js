@@ -1,34 +1,35 @@
-require('dotenv').config();
-const jwt = require('jsonwebtoken');
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey';
+dotenv.config();
 
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+const JWT_SECRET = process.env.JWT_SECRET;
 
-    if (!token) return res.status(401).json({ message: 'No token provided' });
+export const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) {
-            if (err.name === 'TokenExpiredError') {
-                console.log('JWT expired for request');
-            } else {
-                console.error('JWT verification error:', err.message);
-            }
-            return res.status(403).json({ message: 'Invalid or expired token' });
-        }
-        req.user = user;
-        next();
-    });
-};
+  if (!token) return res.status(401).json({ message: "No token provided" });
 
-const authorizeAdmin = (req, res, next) => {
-    if (req.user && req.user.role === 'admin') {
-        next();
-    } else {
-        res.status(403).json({ message: 'Access denied: Admin role required' });
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      if (err.name === "TokenExpiredError") {
+        console.log("JWT expired");
+      } else {
+        console.error("JWT verification error:", err.message);
+      }
+      return res.status(403).json({ message: "Invalid or expired token" });
     }
+
+    req.user = user;
+    next();
+  });
 };
 
-module.exports = { authenticateToken, authorizeAdmin };
+export const authorizeAdmin = (req, res, next) => {
+  if (req.user?.role === "admin") {
+    next();
+  } else {
+    res.status(403).json({ message: "Access denied: Admin only" });
+  }
+};

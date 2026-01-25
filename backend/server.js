@@ -1,51 +1,45 @@
-require('dotenv').config();
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const path = require('path');
-const { connectDB } = require('./config/db');
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
 
-const authRoutes = require('./routes/authRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const issueRoutes = require('./routes/issueRoutes');
+import authRoutes from "./routes/authRoutes.js";
+import issueRoutes from "./routes/issueRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+
+import connectDB from "./config/db.js";
+
+dotenv.config();
 
 const app = express();
-const server = http.createServer(app);
+
 
 connectDB();
 
+
 app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  origin: "*", 
+  credentials: true
 }));
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const uploadsDir = path.join(__dirname, 'uploads');
-app.use('/uploads', express.static(uploadsDir));
 
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"]
-  }
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "JanDrishti API running 🚀" });
 });
 
-app.use((req, res, next) => {
-  req.io = io;
-  next();
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/issues', issueRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/issues", issueRoutes);
+app.use("/api/admin", adminRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(`Backend server running on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });

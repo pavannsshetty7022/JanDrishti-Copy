@@ -1,53 +1,47 @@
-const mysql = require('mysql2/promise');
-require('dotenv').config();
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+import authRoutes from "./routes/authRoutes.js";
+import issueRoutes from "./routes/issueRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import connectDB from "./config/db.js";
+
+dotenv.config();
+
+const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+connectDB();
+
+app.use(cors({
+  origin: "*",
+  credentials: true
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.use("/api/auth", authRoutes);
+app.use("/api/issues", issueRoutes);
+app.use("/api/admin", adminRoutes);
+
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "JanDrishti API running 🚀" });
 });
 
-const connectDB = async () => {
-  try {
-    const connection = await pool.getConnection();
-    console.log('Successfully connected to MySQL database!');
-    connection.release();
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
+});
 
-    await ensureAdminTable();
-    await ensureIssuesSchema();
-  } catch (err) {
-    console.error('Database connection failed:', err.message);
-    process.exit(1);
-  }
-};
+const PORT = process.env.PORT || 5000;
 
-const ensureAdminTable = async () => {
-  await pool.execute(`
-    CREATE TABLE IF NOT EXISTS admins (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      username VARCHAR(255) UNIQUE NOT NULL,
-      password_hash VARCHAR(255) NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-};
-
-const ensureIssuesSchema = async () => {
-  const [latColumn] = await pool.execute(
-    `SHOW COLUMNS FROM issues LIKE 'latitude'`
-  );
-
-  if (latColumn.length === 0) {
-    await pool.execute(`
-      ALTER TABLE issues
-      ADD COLUMN latitude DECIMAL(10,8),
-      ADD COLUMN longitude DECIMAL(11,8)
-    `);
-  }
-};
-
-module.exports = { pool, connectDB };
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

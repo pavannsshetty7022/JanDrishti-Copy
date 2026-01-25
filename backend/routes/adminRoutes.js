@@ -1,14 +1,32 @@
-const express = require('express');
+import express from "express";
+import {
+  testConnectivity,
+  login,
+  createAdmin,
+  checkAdmins
+} from "../controllers/adminController.js";
+
+import {
+  getIssueById
+} from "../controllers/issueController.js";
+
+import {
+  authenticateToken,
+  authorizeAdmin
+} from "../middlewares/authMiddleware.js";
+
 const router = express.Router();
-const adminController = require('../controllers/adminController');
-const issueController = require('../controllers/issueController');
-const { authenticateToken, authorizeAdmin } = require('../middlewares/authMiddleware');
 
+router.get("/test-connectivity", testConnectivity);
+router.post("/login", login);
+router.post("/create", createAdmin);
+router.get("/check", checkAdmins);
 
-router.get('/test-connectivity', adminController.testConnectivity);
-router.post('/login', adminController.login);
-router.post('/create', adminController.createAdmin);
-router.get('/check', adminController.checkAdmins);
-router.get('/get-single-issue/:id', authenticateToken, authorizeAdmin, issueController.getIssueById);
+router.get(
+  "/get-single-issue/:id",
+  authenticateToken,
+  authorizeAdmin,
+  getIssueById
+);
 
-module.exports = router;
+export default router;

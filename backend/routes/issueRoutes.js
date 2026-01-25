@@ -1,17 +1,34 @@
-const express = require('express');
+import express from "express";
+import {
+  createIssue,
+  getUserIssues,
+  searchIssue,
+  updateIssue,
+  deleteIssue,
+  getAllIssues,
+  getIssueById,
+  updateIssueStatus
+} from "../controllers/issueController.js";
+
+import { authenticateToken, authorizeAdmin } from "../middlewares/authMiddleware.js";
+import upload from "../middlewares/upload.js";
+
 const router = express.Router();
-const issueController = require('../controllers/issueController');
-const { authenticateToken, authorizeAdmin } = require('../middlewares/authMiddleware');
-const upload = require('../middlewares/uploadMiddleware');
 
-router.post('/', authenticateToken, upload.array('media', 10), issueController.createIssue);
-router.get('/user/:userId', authenticateToken, issueController.getUserIssues);
-router.get('/search/:issueId', authenticateToken, issueController.searchIssue);
-router.put('/:id', authenticateToken, upload.fields([{ name: 'newMedia', maxCount: 10 }, { name: 'existingMedia', maxCount: 20 }]), issueController.updateIssue);
-router.delete('/:id', authenticateToken, issueController.deleteIssue);
+router.post("/", authenticateToken, upload.array("media", 10), createIssue);
 
-router.get('/', authenticateToken, authorizeAdmin, issueController.getAllIssues);
-router.put('/:id/status', authenticateToken, authorizeAdmin, issueController.updateIssueStatus);
+router.get("/user/:userId", authenticateToken, getUserIssues);
 
+router.get("/search/:issueId", authenticateToken, searchIssue);
 
-module.exports = router;
+router.put("/:id", authenticateToken, upload.array("media", 10), updateIssue);
+
+router.delete("/:id", authenticateToken, deleteIssue);
+
+router.get("/", authenticateToken, authorizeAdmin, getAllIssues);
+
+router.get("/:id", authenticateToken, authorizeAdmin, getIssueById);
+
+router.put("/:id/status", authenticateToken, authorizeAdmin, updateIssueStatus);
+
+export default router;
