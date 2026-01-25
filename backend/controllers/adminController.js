@@ -59,7 +59,7 @@ export const createAdmin = async (req, res) => {
   } catch (error) {
     console.error("Admin creation error:", error);
 
-    if (error.code === "ER_DUP_ENTRY") {
+    if (error.code === 11000) {
       return res.status(409).json({ message: "Admin username already exists" });
     }
 

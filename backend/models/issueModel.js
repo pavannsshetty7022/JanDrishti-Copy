@@ -1,4 +1,30 @@
-import { pool } from "../config/db.js";
+import { Issue } from "./mongooseModels.js";
+
+const mapIssueForController = (issue) => {
+  if (!issue) return null;
+  const obj = issue.toJSON();
+  if (obj.user_id && typeof obj.user_id === "object") {
+    const user = obj.user_id;
+    return {
+      ...obj,
+      user_id: user.id,
+      full_name: user.full_name,
+      phone_number: user.phone_number,
+      address: user.address,
+      user_type: user.user_type,
+      user_type_custom: user.user_type_custom,
+      media_paths: JSON.stringify(obj.media_paths || []),
+      created_at: obj.createdAt,
+      resolved_at: obj.resolved_at
+    };
+  }
+  return {
+    ...obj,
+    media_paths: JSON.stringify(obj.media_paths || []),
+    created_at: obj.createdAt,
+    resolved_at: obj.resolved_at
+  };
+};
 
 export const createIssue = async (issueData) => {
   const {
@@ -13,45 +39,35 @@ export const createIssue = async (issueData) => {
     mediaPaths
   } = issueData;
 
-  const [result] = await pool.execute(
-    `INSERT INTO issues 
-    (issue_id, user_id, title, description, location, latitude, longitude, date_of_occurrence, media_paths, status, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN', NOW())`,
-    [issueId, userId, title, description, location, latitude || null, longitude || null, dateOfOccurrence, mediaPaths]
-  );
+  const issue = await Issue.create({
+    issue_id: issueId,
+    user_id: userId,
+    title,
+    description,
+    location,
+    latitude: latitude || null,
+    longitude: longitude || null,
+    date_of_occurrence: dateOfOccurrence,
+    media_paths: JSON.parse(mediaPaths || "[]"),
+    status: "OPEN"
+  });
 
-  return result.insertId;
+  return issue.id;
 };
 
 export const findIssueById = async (id) => {
-  const [rows] = await pool.execute(`
-    SELECT
-      i.id, i.issue_id, i.user_id, i.title, i.description, i.location,
-      i.date_of_occurrence, i.media_paths, i.status, i.feedback, i.rating,
-      i.created_at, i.resolved_at,
-      u.full_name, u.phone_number, u.address, u.user_type, u.user_type_custom
-    FROM issues i
-    JOIN users u ON i.user_id = u.id
-    WHERE i.id = ?
-  `, [id]);
-
-  return rows[0];
+  const issue = await Issue.findById(id).populate("user_id");
+  return mapIssueForController(issue);
 };
 
 export const findIssuesByUserId = async (userId) => {
-  const [rows] = await pool.execute(
-    "SELECT * FROM issues WHERE user_id = ? ORDER BY created_at DESC",
-    [userId]
-  );
-  return rows;
+  const issues = await Issue.find({ user_id: userId }).sort({ createdAt: -1 });
+  return issues.map(issue => mapIssueForController(issue));
 };
 
 export const findIssueByIssueIdAndUserId = async (issueId, userId) => {
-  const [rows] = await pool.execute(
-    "SELECT * FROM issues WHERE issue_id = ? AND user_id = ?",
-    [issueId, userId]
-  );
-  return rows[0];
+  const issue = await Issue.findOne({ issue_id: issueId, user_id: userId });
+  return mapIssueForController(issue);
 };
 
 export const updateIssue = async (id, issueData) => {
@@ -65,64 +81,53 @@ export const updateIssue = async (id, issueData) => {
     allMediaPaths
   } = issueData;
 
-  await pool.execute(
-    `UPDATE issues 
-     SET title=?, description=?, location=?, latitude=?, longitude=?, 
-         date_of_occurrence=?, media_paths=? 
-     WHERE id=?`,
-    [title, description, location, latitude || null, longitude || null, dateOfOccurrence, allMediaPaths, id]
-  );
+  await Issue.findByIdAndUpdate(id, {
+    title,
+    description,
+    location,
+    latitude: latitude || null,
+    longitude: longitude || null,
+    date_of_occurrence: dateOfOccurrence,
+    media_paths: JSON.parse(allMediaPaths || "[]")
+  });
 };
 
 export const deleteIssue = async (id) => {
-  await pool.execute("DELETE FROM issues WHERE id = ?", [id]);
+  await Issue.findByIdAndDelete(id);
 };
 
 export const findAllIssues = async (status, search) => {
-  let query = `
-    SELECT
-      i.id, i.issue_id, i.user_id, i.title, i.description, i.location,
-      i.date_of_occurrence, i.media_paths, i.status, i.feedback, i.rating,
-      i.created_at, i.resolved_at,
-      u.full_name, u.phone_number, u.address, u.user_type, u.user_type_custom
-    FROM issues i
-    JOIN users u ON i.user_id = u.id
-  `;
-
-  const params = [];
-  const conditions = [];
+  let query = {};
 
   if (status) {
-    conditions.push("i.status = ?");
-    params.push(status);
+    query.status = status;
   }
 
   if (search) {
-    conditions.push("(i.issue_id LIKE ? OR i.title LIKE ? OR i.description LIKE ?)");
-    params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    query.$or = [
+      { issue_id: { $regex: search, $options: "i" } },
+      { title: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } }
+    ];
   }
 
-  if (conditions.length > 0) {
-    query += " WHERE " + conditions.join(" AND ");
-  }
-
-  query += " ORDER BY i.created_at DESC";
-
-  const [rows] = await pool.execute(query, params);
-  return rows;
+  const issues = await Issue.find(query).populate("user_id").sort({ createdAt: -1 });
+  return issues.map(issue => mapIssueForController(issue));
 };
 
 export const updateIssueStatus = async (id, status, resolvedAt) => {
-  await pool.execute(
-    "UPDATE issues SET status=?, resolved_at=? WHERE id=?",
-    [status, resolvedAt, id]
-  );
+  await Issue.findByIdAndUpdate(id, {
+    status: status,
+    resolved_at: resolvedAt
+  });
 };
 
 export const getIssueStatusAndUserId = async (id) => {
-  const [rows] = await pool.execute(
-    "SELECT id, issue_id, status, user_id, media_paths FROM issues WHERE id=?",
-    [id]
-  );
-  return rows[0];
+  const issue = await Issue.findById(id).select("issue_id status user_id media_paths");
+  if (!issue) return null;
+  const obj = issue.toJSON();
+  return {
+    ...obj,
+    media_paths: JSON.stringify(obj.media_paths || [])
+  };
 };

@@ -38,7 +38,7 @@ export const register = async (req, res) => {
     });
 
   } catch (error) {
-    if (error.code === "ER_DUP_ENTRY") {
+    if (error.code === 11000) {
       return res.status(409).json({ message: "Username already exists" });
     }
 

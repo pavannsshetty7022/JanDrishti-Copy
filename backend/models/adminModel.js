@@ -1,23 +1,26 @@
-import { pool } from "../config/db.js";
+import { Admin } from "./mongooseModels.js";
 
 export const createAdmin = async (username, hashedPassword) => {
-  await pool.execute(
-    "INSERT INTO admins (username, password_hash) VALUES (?, ?)",
-    [username, hashedPassword]
-  );
+  await Admin.create({
+    username,
+    password_hash: hashedPassword
+  });
 };
 
 export const findAdminByUsername = async (username) => {
-  const [rows] = await pool.execute(
-    "SELECT id, username, password_hash FROM admins WHERE username = ?",
-    [username]
-  );
-  return rows[0];
+  const admin = await Admin.findOne({ username });
+  return admin ? admin.toJSON() : null;
 };
 
 export const getAllAdmins = async () => {
-  const [rows] = await pool.execute(
-    "SELECT id, username, created_at FROM admins"
-  );
-  return rows;
+  const admins = await Admin.find().select("username createdAt");
+  return admins.map(admin => {
+    const obj = admin.toJSON();
+    return {
+      id: obj.id,
+      username: obj.username,
+      created_at: obj.createdAt
+    };
+  });
 };
+

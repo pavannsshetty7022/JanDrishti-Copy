@@ -1,4 +1,4 @@
-import { pool } from "../config/db.js";
+import { User } from "./mongooseModels.js";
 
 export const createUser = async (userData) => {
   const {
@@ -11,46 +11,33 @@ export const createUser = async (userData) => {
     userTypeCustom
   } = userData;
 
-  const [result] = await pool.execute(
-    `INSERT INTO users 
-     (username, password_hash, full_name, phone_number, address, user_type, user_type_custom)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [username, hashedPassword, fullName, phoneNumber, address, userType, userTypeCustom || null]
-  );
+  const user = await User.create({
+    username,
+    password_hash: hashedPassword,
+    full_name: fullName,
+    phone_number: phoneNumber,
+    address,
+    user_type: userType,
+    user_type_custom: userTypeCustom || null
+  });
 
-  return result.insertId;
+  return user.id;
 };
 
 export const findUserByUsername = async (username) => {
-  const [rows] = await pool.execute(
-    `SELECT 
-      id, 
-      password_hash, 
-      username, 
-      full_name IS NOT NULL AS profile_completed 
-     FROM users 
-     WHERE username = ?`,
-    [username]
-  );
+  const user = await User.findOne({ username });
+  if (!user) return null;
 
-  return rows[0];
+  const userObj = user.toJSON();
+  return {
+    ...userObj,
+    profile_completed: !!userObj.full_name
+  };
 };
 
 export const findUserById = async (id) => {
-  const [rows] = await pool.execute(
-    `SELECT 
-      username, 
-      full_name, 
-      phone_number, 
-      address, 
-      user_type, 
-      user_type_custom 
-     FROM users 
-     WHERE id = ?`,
-    [id]
-  );
-
-  return rows[0];
+  const user = await User.findById(id);
+  return user ? user.toJSON() : null;
 };
 
 export const updateUser = async (id, userData) => {
@@ -62,10 +49,12 @@ export const updateUser = async (id, userData) => {
     userTypeCustom
   } = userData;
 
-  await pool.execute(
-    `UPDATE users 
-     SET full_name=?, phone_number=?, address=?, user_type=?, user_type_custom=? 
-     WHERE id=?`,
-    [fullName, phoneNumber, address, userType, userTypeCustom || null, id]
-  );
+  await User.findByIdAndUpdate(id, {
+    full_name: fullName,
+    phone_number: phoneNumber,
+    address: address,
+    user_type: userType,
+    user_type_custom: userTypeCustom || null
+  });
 };
+
