@@ -131,3 +131,17 @@ export const getIssueStatusAndUserId = async (id) => {
     media_paths: JSON.stringify(obj.media_paths || [])
   };
 };
+
+const issueModel = {
+  createIssue,
+  findIssueById,
+  findIssuesByUserId,
+  findIssueByIssueIdAndUserId,
+  updateIssue,
+  deleteIssue,
+  findAllIssues,
+  updateIssueStatus,
+  getIssueStatusAndUserId
+};
+
+export default issueModel;

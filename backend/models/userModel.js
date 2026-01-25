@@ -57,4 +57,11 @@ export const updateUser = async (id, userData) => {
     user_type_custom: userTypeCustom || null
   });
 };
+const userModel = {
+  createUser,
+  findUserByUsername,
+  findUserById,
+  updateUser
+};
 
+export default userModel;

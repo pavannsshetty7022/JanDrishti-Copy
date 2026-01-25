@@ -23,4 +23,10 @@ export const getAllAdmins = async () => {
     };
   });
 };
+const adminModel = {
+  createAdmin,
+  findAdminByUsername,
+  getAllAdmins
+};
 
+export default adminModel;
