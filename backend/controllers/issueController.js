@@ -136,16 +136,7 @@ const updateIssue = async (req, res) => {
 
         const pathsToDelete = currentDbMediaPaths.filter(p => !existingMediaPaths.includes(p));
         pathsToDelete.forEach(filePath => {
-            const fullPath = path.join(__dirname, '../', filePath); // Adjusted path to be relative from root of backend if needed, or use absolute logic from server.js
-            // server.js used: path.join(__dirname, filePath) where __dirname was server.js's dir. 
-            // Controllers are in backend/controllers. server.js is in backend/.
-            // So path.join(__dirname, '../', filePath) is correct if filePath starts with /uploads/ 
-            // Because /uploads is in backend/uploads.
-            // Wait, server.js: const uploadsDir = path.join(__dirname, 'uploads'); (backend/uploads)
-            // filePath stored in DB is `/uploads/filename`.
-            // So path.join(__dirname, '../', filePath) => backend/controllers/../uploads/filename => backend/uploads/filename. Correct.
-
-            // However, safest to just look for 'uploads' dir relative to backend root.
+            const fullPath = path.join(__dirname, '../', filePath); 
             if (fs.existsSync(fullPath)) {
                 fs.unlink(fullPath, (err) => {
                     if (err) console.error(`Error deleting old media file: ${fullPath}`, err);
@@ -206,7 +197,7 @@ const deleteIssue = async (req, res) => {
 
         if (mediaPathsToDelete.length > 0) {
             mediaPathsToDelete.forEach(filePath => {
-                const fullPath = path.join(__dirname, '../', filePath); // Adjust per logic above
+                const fullPath = path.join(__dirname, '../', filePath); 
                 if (fs.existsSync(fullPath)) {
                     fs.unlink(fullPath, (err) => {
                         if (err) console.error('Error deleting media file:', err);
