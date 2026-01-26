@@ -72,9 +72,12 @@ const updateIssueStatus = async (issueId, status, token) => {
   return data;
 };
 
-export default {
+const AdminService = {
   login,
   getAllIssues,
   getIssueById,
   updateIssueStatus
 };
+
+export default AdminService;
+
