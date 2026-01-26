@@ -1,70 +1,37 @@
+const API_URL = 'https://jandrishti-community-issue-tracker.onrender.com/api';
 
-const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const fetchWithTimeout = (url, options = {}, timeout = 15000) =>
+  Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timeout")), timeout)
+    )
+  ]);
 
 const login = async (username, password) => {
-  console.log('Admin service - attempting login for:', username);
-  console.log('Admin service - API URL:', API_URL);
-
-  const response = await fetch(`${API_URL}/admin/login`, {
+  const response = await fetchWithTimeout(`${API_URL}/admin/login`, {
     method: 'POST',
+    credentials: "include",
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
-  const data = await response.json();
-  console.log('Admin service - response status:', response.status);
-  console.log('Admin service - response data:', data);
 
-  if (!response.ok) {
-    throw new Error(data.message || 'Admin login failed');
-  }
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Admin login failed');
   return data;
 };
 
 const getAllIssues = async (token, statusFilter = '', searchQuery = '') => {
-  try {
-    let url = `${API_URL}/issues`;
-    const params = new URLSearchParams();
-    if (statusFilter) {
-      params.append('status', statusFilter);
-    }
-    if (searchQuery) {
-      params.append('search', searchQuery);
-    }
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
+  let url = `${API_URL}/issues`;
+  const params = new URLSearchParams();
 
-    console.log('Fetching issues from:', url);
+  if (statusFilter) params.append('status', statusFilter);
+  if (searchQuery) params.append('search', searchQuery);
+  if (params.toString()) url += `?${params.toString()}`;
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('Server response error:', data);
-      throw new Error(data.message || 'Failed to fetch all issues');
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error fetching issues:', error);
-    throw new Error(error.message || 'Network error while fetching issues');
-  }
-};
-
-const getIssueById = async (id, token) => {
-  const url = `${API_URL}/admin/get-single-issue/${id}`;
-  console.log('Fetching single issue from:', url);
-
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     method: 'GET',
+    credentials: "include",
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -72,42 +39,46 @@ const getIssueById = async (id, token) => {
     }
   });
 
-  const contentType = response.headers.get("content-type");
-  if (!contentType || !contentType.includes("application/json")) {
-    const text = await response.text();
-    console.error("Critical Error: Received non-JSON response from", url);
-    console.error("Response Preview:", text.substring(0, 100));
-    throw new Error(`Server returned ${contentType || 'unknown type'} instead of JSON. Possible routing conflict or backend crash.`);
-  }
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to fetch issues');
+  return data;
+};
+
+const getIssueById = async (id, token) => {
+  const response = await fetchWithTimeout(`${API_URL}/admin/get-single-issue/${id}`, {
+    method: 'GET',
+    credentials: "include",
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  });
 
   const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Failed to fetch issue details');
-  }
+  if (!response.ok) throw new Error(data.message || 'Failed to fetch issue');
   return data;
 };
 
 const updateIssueStatus = async (issueId, status, token) => {
-  const response = await fetch(`${API_URL}/issues/${issueId}/status`, {
+  const response = await fetchWithTimeout(`${API_URL}/issues/${issueId}/status`, {
     method: 'PUT',
+    credentials: "include",
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
     body: JSON.stringify({ status }),
   });
+
   const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Failed to update issue status');
-  }
+  if (!response.ok) throw new Error(data.message || 'Failed to update status');
   return data;
 };
 
-const AdminService = {
+export default {
   login,
   getAllIssues,
   getIssueById,
   updateIssueStatus
 };
-
-export default AdminService;
