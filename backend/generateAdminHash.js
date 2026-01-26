@@ -1,14 +1,7 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcrypt";
 
-const newAdminPassword = 'Pk@7022302564'; 
-const saltRounds = 10;
+const password = "Pk@7022302564";
 
-bcrypt.hash(newAdminPassword, saltRounds, (err, hash) => {
-    if (err) {
-        console.error('Error hashing password:', err);
-        return;
-    }``
-
-    console.log('New Admin Username: pavannsshetty'); 
-    console.log('Hashed Password:', hash);
+bcrypt.hash(password, 10).then(hash => {
+  console.log(hash);
 });
