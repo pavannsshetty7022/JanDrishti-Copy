@@ -16,7 +16,6 @@ const app = express();
 
 const server = http.createServer(app);
 
-// ---- SOCKET.IO SETUP ----
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -33,16 +32,14 @@ io.on("connection", (socket) => {
   });
 });
 
-// Make io available inside routes
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
-// ---- DB ----
+
 connectDB();
 
-// ---- MIDDLEWARE ----
 app.use(cors({
   origin: "*",
   credentials: true
@@ -51,7 +48,6 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ---- ROUTES ----
 app.get("/", (req, res) => {
   res.status(200).json({ status: "JanDrishti API running 🚀" });
 });
@@ -64,7 +60,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/issues", issueRoutes);
 app.use("/api/admin", adminRoutes);
 
-// ---- START SERVER ----
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
