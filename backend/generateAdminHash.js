@@ -7,7 +7,7 @@ bcrypt.hash(newAdminPassword, saltRounds, (err, hash) => {
     if (err) {
         console.error('Error hashing password:', err);
         return;
-    }
+    }``
 
     console.log('New Admin Username: pavannsshetty'); 
     console.log('Hashed Password:', hash);
