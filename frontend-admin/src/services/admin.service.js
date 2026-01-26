@@ -11,7 +11,6 @@ const fetchWithTimeout = (url, options = {}, timeout = 15000) =>
 const login = async (username, password) => {
   const response = await fetchWithTimeout(`${API_URL}/admin/login`, {
     method: 'POST',
-    credentials: "include",
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
@@ -31,7 +30,6 @@ const getAllIssues = async (token, statusFilter = '', searchQuery = '') => {
 
   const response = await fetchWithTimeout(url, {
     method: 'GET',
-    credentials: "include",
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -47,7 +45,6 @@ const getAllIssues = async (token, statusFilter = '', searchQuery = '') => {
 const getIssueById = async (id, token) => {
   const response = await fetchWithTimeout(`${API_URL}/admin/get-single-issue/${id}`, {
     method: 'GET',
-    credentials: "include",
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -63,7 +60,6 @@ const getIssueById = async (id, token) => {
 const updateIssueStatus = async (issueId, status, token) => {
   const response = await fetchWithTimeout(`${API_URL}/issues/${issueId}/status`, {
     method: 'PUT',
-    credentials: "include",
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -76,11 +72,9 @@ const updateIssueStatus = async (issueId, status, token) => {
   return data;
 };
 
-const AdminService = {
+export default {
   login,
   getAllIssues,
   getIssueById,
   updateIssueStatus
 };
-
-export default AdminService;

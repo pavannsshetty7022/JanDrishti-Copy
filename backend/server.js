@@ -13,14 +13,20 @@ import connectDB from "./config/db.js";
 dotenv.config();
 
 const app = express();
-
 const server = http.createServer(app);
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://jandrishti-admin.netlify.app",
+  "https://jandrishti-user.netlify.app"
+];
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    credentials: false
   }
 });
 
@@ -37,12 +43,13 @@ app.use((req, res, next) => {
   next();
 });
 
-
 connectDB();
 
 app.use(cors({
-  origin: "*",
-  credentials: true
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false
 }));
 
 app.use(express.json());
