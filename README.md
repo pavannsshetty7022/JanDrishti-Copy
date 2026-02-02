@@ -2,7 +2,7 @@
 <div align="center">
   <img src="assets/images/Jandrishti JD Logo.png" alt="JanDrishti Logo" width="150"/>
   <h1>JanDrishti</h1>
-  <p><b>Public Grievance Management System 🗳️</b></p>
+  <p><b>Public Issue Management System 🗳️</b></p>
   <p>
     A robust platform for citizens to report local issues and for authorities to manage and resolve them efficiently.
   </p>
