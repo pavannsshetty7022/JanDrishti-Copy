@@ -45,7 +45,7 @@
 |-------|-----------|
 | **Frontend** | <img src="https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white"> <img src="https://img.shields.io/badge/-Bootstrap%205-7952B3?logo=bootstrap&logoColor=white"> <img src="https://img.shields.io/badge/-Socket.io-010101?logo=socket.io&logoColor=white"> |
 | **Backend** | <img src="https://img.shields.io/badge/-Node.js-339933?logo=node.js&logoColor=white"> <img src="https://img.shields.io/badge/-Express-000000?logo=express&logoColor=white"> |
-| **Database** | <img src="https://img.shields.io/badge/-MySQL-4479A1?logo=mysql&logoColor=white"> |
+| **Database** | <img src="https://img.shields.io/badge/-MySQL-4479A1?logo=mongodb&logoColor=white"> |
 | **Authentication** | JWT (JSON Web Token) |
 | **Deployment** | Azure (Planned) |                                                                                      |
 
